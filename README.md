@@ -1,7 +1,9 @@
 # Presentation
 Presentation is a package to use Webly Walk-Through as a presentation tool.
 
-#Setup
+# How to use
+
+The below shows basic steps to use ViennaTalkersDeck.
 
 ## Load the spec
 
@@ -15,6 +17,16 @@ Type the following into the Web API tab.
 mk_SlideInfo($page, $slide) <=> {"page":$page, "slide": $slide}
 ```
 
-## Open the slide
+## Open the deck
 
 Open the index.html in a web browser.
+
+## Save the slides
+
+Click on ```download``` on the top.
+
+## Open the slides from a file
+
+Drop the file on-to the deck.
+
+## Enjoy!
