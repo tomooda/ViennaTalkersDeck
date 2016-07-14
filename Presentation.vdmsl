@@ -1,0 +1,90 @@
+module Presentation
+exports all
+definitions
+types
+     Slide = seq of char;
+     Page = nat1;
+     SlideInfo :: Page Slide;
+
+values
+     notAvailable = "# No Slide";
+     newSlide = "# New Slide";
+
+state State of
+    slides : seq of Slide
+    current : Page
+init s == s = mk_State([newSlide], 1)
+end
+
+operations
+    get : () ==> SlideInfo
+    get() == return mk_SlideInfo(current, slides(current));
+    
+    next : () ==> SlideInfo
+    next() ==
+        (if current < len slides then current := current + 1;
+        return get());
+    
+    prev : () ==> SlideInfo
+    prev() ==
+        (if current > 1 then current := current - 1;
+        return get());
+    
+    delete : () ==> SlideInfo
+    delete() ==
+        (slides
+            := if
+                len slides > 1
+            then
+                slides(1,...,(current - 1)) ^ slides((current + 1),...,(len slides))
+            else
+                [newSlide];
+        if current > len slides then current := len slides;
+        return get());
+    
+    moveFront : () ==> SlideInfo
+    moveFront() ==
+        (if
+            current > 1
+        then
+            (slides
+                := slides(1,...,(current - 2)) ^ [slides(current), slides(current - 1)]
+                ^ slides((current + 1),...,(len slides));
+            current := current - 1);
+        return get());
+    
+    moveBack : () ==> SlideInfo
+    moveBack() ==
+        (if
+            current < len slides
+        then
+            (slides
+                := slides(1,...,(current - 1)) ^ [slides(current + 1), slides(current)]
+                ^ slides((current + 2),...,(len slides));
+            current := current + 1);
+        return get());
+    
+    overwrite : Slide ==> SlideInfo
+    overwrite(string) ==
+        (slides(current) := string;
+        return get());
+    
+    insert : () ==> SlideInfo
+    insert() ==
+        (slides
+            := slides(1,...,current) ^ [newSlide]
+            ^ slides((current + 1),...,(len slides));
+        current := current + 1;
+        return get());
+    
+    dump : () ==> seq of Slide
+    dump() == return slides;
+    
+    load : seq of Slide ==> SlideInfo
+    load(newSlides) ==
+        (slides := newSlides;
+        current := 1;
+        return get());
+
+end Presentation
+

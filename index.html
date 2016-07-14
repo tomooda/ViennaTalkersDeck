@@ -1,0 +1,136 @@
+<html>
+<head>
+<link rel="stylesheet" type="text/css" href="slide.css">
+</head>
+<body>
+<div onmouseover="showNavbar();" onmouseout="hideNavbar();">
+<div id="navbar" style="width:100%;color:gray;cursor: default">
+  <span id="prev" onclick="prev();">prev</span>
+  <span id="edit" onclick="edit();">edit</span>
+  <span id="append" onclick="append();">append</span>
+  <span id="delete" onclick="del();">delete</span>
+  <span id="moveFront" onclick="moveFront();">moveFront</span>
+  <span id="moveBack" onclick="moveBack();">moveBack</span>
+  <span id="page" style="color:black;padding-left:50px">1</span>
+  <span id="next" onclick="next();" style="float:right;">next</span>
+</div>
+</div>
+<div id="slide" style="padding-left:20px; width:95%;"></div>
+<script type="text/javascript" src="marked.js"></script>
+<script type="text/javascript">
+marked.setOptions({
+  gfm: true,
+  tables: true,
+  breaks: true,
+  pedantic: true,
+  sanitize: false,
+  smartLists: true,
+  smartypants: true,
+  langPrefix: 'language-',
+  highlight: function(code, lang) {
+    // hogehoge
+    return code;
+  }
+});
+
+navbar = document.getElementById("navbar");
+page = document.getElementById("page");
+slide = document.getElementById("slide");
+current = 1;
+slideMD = "";
+
+function update(slideinfo) {
+  slideMD = slideinfo.slide;
+  slide.innerHTML=marked(slideMD);
+  page.innerText = ""+slideinfo.page;
+  page.textContent = ""+slideinfo.page;
+}
+
+function API(op, cont) {
+  var req = new XMLHttpRequest();
+  req.onreadystatechange = function () {
+    if (req.readyState == 4 && req.status == 200) {
+      update(JSON.parse(req.responseText));
+      if (cont) cont();
+    }
+  }
+  req.open("GET", "http://localhost:8087/Presentation/"+op, true);
+  req.send();
+}
+
+function load() {
+  document.onkeydown = key;
+  API("get");
+}
+
+function next() {
+  API("next");
+}
+
+function prev() {
+  API("prev");
+}
+
+function moveFront() {
+  API("moveFront");
+}
+
+function moveBack() {
+  API("moveBack");
+}
+
+function edit() {
+  slide.innerHTML='<textarea id="md" style="width:100%; height:20em" onkeydown="">'+slideMD+'</textarea><br><div  style="float:right;"><button onclick="cancel();">Cancel</button><button onclick="accept();">Accept</button></div>';
+  document.onkeydown=null;
+}
+
+function accept() {
+  var md = document.getElementById("md");
+  if (!md) {
+    load();
+    return;
+  }
+  var req = new XMLHttpRequest();
+  req.onreadystatechange = function () {
+    if (req.readyState == 4 && req.status == 200) {
+      load();
+    }
+  }
+  req.open("POST", "http://localhost:8087/Presentation/overwrite", true);
+  req.setRequestHeader('Content-Type', 'application/json');
+  req.send(JSON.stringify([md.value]));
+}
+
+function cancel() {
+  load();
+}
+
+function append() {
+  API("insert", edit);
+}
+
+function del() {
+  API("delete");
+}
+
+function showNavbar() {
+  navbar.style.visibility = "visible";
+}
+
+function hideNavbar() {
+  navbar.style.visibility = "hidden";
+}
+
+function key(e) {
+  if (e.charCode == 13 || e.charCode == 32 || e.keyCode == 39) {
+    next();
+  }
+  if (e.keyCode == 37 || e.keyCode == 8) {
+    prev();
+  }
+}
+
+load();
+</script>
+</body>
+</html>
