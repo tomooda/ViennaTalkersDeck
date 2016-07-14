@@ -1,4 +1,5 @@
-<html>
+<html ondragenter="return false;" ondragover="return false;" 
+      ondrop="return upload(event);">
 <head>
 <link rel="stylesheet" type="text/css" href="slide.css">
 </head>
@@ -11,12 +12,14 @@
   <span id="delete" onclick="del();">delete</span>
   <span id="moveFront" onclick="moveFront();">moveFront</span>
   <span id="moveBack" onclick="moveBack();">moveBack</span>
+  <span id="dump" onclick="dump();">download</span>
   <span id="page" style="color:black;padding-left:50px">1</span>
   <span id="next" onclick="next();" style="float:right;">next</span>
 </div>
 </div>
 <div id="slide" style="padding-left:20px; width:95%;"></div>
 <script type="text/javascript" src="marked.js"></script>
+<script type="text/javascript" src="FileSaver.js"></script>
 <script type="text/javascript">
 marked.setOptions({
   gfm: true,
@@ -111,6 +114,46 @@ function append() {
 
 function del() {
   API("delete");
+}
+
+function dump() {
+  var req = new XMLHttpRequest();
+  req.onreadystatechange = function () {
+    if (req.readyState == 4 && req.status == 200) {
+      alert(req.responseText)
+      var blob = new Blob([req.responseText], {type: "application/json;charset=utf-8"});
+      saveAs(blob);
+    }
+  }
+  req.open("GET", "http://localhost:8087/Presentation/dump", true);
+  req.setRequestHeader('Content-Type', 'application/json');
+  req.send();
+}
+
+function upload(event) {
+  if (event.dataTransfer && event.dataTransfer.files) {
+    var reader = new FileReader();
+    reader.onload = function(e) {
+      var req = new XMLHttpRequest();
+      req.onreadystatechange = function () {
+        if (req.readyState == 4 && req.status == 200) {
+          load();
+        }
+      }
+      req.open("POST", "http://localhost:8087/Presentation/load", true);
+      req.setRequestHeader('Content-Type', 'application/json');
+      req.send("["+e.target.result+"]");
+    };
+    reader.readAsText(event.dataTransfer.files[0], "utf-8");
+  } else {
+    alert("Your browser does not support file drag&drop.");
+  }
+  if (event.stopPropagation)
+    event.stopPropagation();
+  if (event.preventDefault)
+    event.preventDefault();
+  event.cancelBubble = true;
+  return false;
 }
 
 function showNavbar() {
