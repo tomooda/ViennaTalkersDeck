@@ -18,10 +18,10 @@
 </div>
 </div>
 <div id="slide" style="padding-left:20px; width:95%;"></div>
-<script type="text/javascript" src="marked.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <script type="text/javascript" src="FileSaver.js"></script>
 <script type="text/javascript">
-marked.setOptions({
+marked.marked.setOptions({
   gfm: true,
   tables: true,
   breaks: true,
@@ -44,7 +44,7 @@ slideMD = "";
 
 function update(slideinfo) {
   slideMD = slideinfo.slide;
-  slide.innerHTML=marked(slideMD);
+  slide.innerHTML=marked.marked(slideMD);
   page.innerText = ""+slideinfo.page;
   page.textContent = ""+slideinfo.page;
 }
